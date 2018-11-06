@@ -5,7 +5,7 @@ use Opencontent\Opendata\Api\ContentSearch;
 use Opencontent\Opendata\Api\Values\Content;
 
 
-class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
+class DataHandlerOCMapMarkers implements OpenPADataHandlerInterface
 {
 
   public $contentType = 'geojson';
@@ -21,9 +21,9 @@ class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
   }
 
 
-  private function load( $hashIdentifier )
+  private function load($hashIdentifier)
   {
-    $query      = $this->query;
+    $query = $this->query;
     $attributes = $this->attributes;
     $args = compact(array("hashIdentifier", "query", "attributes"));
 
@@ -43,11 +43,11 @@ class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
     }
   }
 
-  public static function generateCache( $file, $args )
+  public static function generateCache($file, $args)
   {
 
-    extract( $args );
-    $content = self::find( $query, $attributes);
+    extract($args);
+    $content = self::find($query, $attributes);
 
     return array(
       'content' => $content,
@@ -92,48 +92,36 @@ class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
     return $result;
   }
 
-  protected static function find( $query, $attributes)
+  protected static function find($query, $attributes)
   {
     $featureData = new OCMapMarkersGeoJsonFeatureCollection();
-    $language    = eZLocale::currentLocaleCode();
+    $language = eZLocale::currentLocaleCode();
     try {
       $data = self::findAll($query, $language);
       $result['facets'] = $data->facets;
 
       foreach ($data->searchHits as $hit) {
         try {
+          foreach ($attributes as $attribute) {
 
-          foreach ($attributes as $attribute)
-          {
-            if (isset($hit['data'][$language][$attribute]))
-            {
-              foreach ($hit['data'][$language][$attribute]['content'] as $gObject)
-              {
-                $geoObjectId = $gObject['id'];
-                $geoObject = eZContentObject::fetch($geoObjectId);
+            if (isset($hit['data'][$language][$attribute]['content'])) {
+              $properties = array(
+                'id' => $hit['metadata']['id'],
+                'type' => $hit['metadata']['classIdentifier'],
+                'class' => $hit['metadata']['classIdentifier'],
+                'name' => $hit['metadata']['name'][$language],
+                'url' => '/content/view/full/' . $hit['metadata']['mainNodeId'],
+                'popupContent' => '<em>Loading...</em>'
+              );
 
-                if ($geoObject instanceof eZContentObject) {
-                  $properties = array(
-                    /*'id' => $hit['metadata']['id'],*/
-                    'id' => $geoObjectId,
-                    'type' => $hit['metadata']['classIdentifier'],
-                    'class' => $hit['metadata']['classIdentifier'],
-                    'name' => $hit['metadata']['name'][$language],
-                    'url' => '/content/view/full/' . $hit['metadata']['mainNodeId'],
-                    'popupContent' => '<em>Loading...</em>'
-                  );
-
-                  $geoDataMap = $geoObject->dataMap();
-                  if ($geoDataMap['geo']->hasContent()) {
-                    $geoData = $geoDataMap['geo']->content();
-                    /*$feature = new OCMapMarkersGeoJsonFeature($hit['metadata']['id'],
-                      array($geoData->longitude, $geoData->latitude), $properties);*/
-                    $feature = new OCMapMarkersGeoJsonFeature($geoObjectId,
-                      array($geoData->longitude, $geoData->latitude), $properties);
-                    $featureData->add($feature);
-                  }
-                }
-              }
+              $feature = new OCMapMarkersGeoJsonFeature($hit['metadata']['id'],
+                array(
+                  $hit['data'][$language][$attribute]['content']['longitude'],
+                  $hit['data'][$language][$attribute]['content']['latitude']
+                ),
+                $properties
+              );
+              $featureData->add($feature);
             }
           }
 
@@ -141,7 +129,7 @@ class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
           eZDebug::writeError($e->getMessage(), __METHOD__);
         }
       }
-      $result['content'] =  $featureData;
+      $result['content'] = $featureData;
       return json_encode($result);
 
     } catch (Exception $e) {
@@ -158,7 +146,7 @@ class DataHandlerOCRelatedMapMarkers implements OpenPADataHandlerInterface
         $this->query = eZHTTPTool::instance()->getVariable('query');
         $this->attributes = explode(',', eZHTTPTool::instance()->getVariable('attribute'));
 
-        return  json_decode( $this->load( md5(trim($this->query . '-' . implode('-', $this->attributes))) ), true ) ;
+        return json_decode($this->load(md5(trim($this->query . '-' . implode('-', $this->attributes)))), true);
 
       }
     } elseif ($this->contentType == 'marker') {

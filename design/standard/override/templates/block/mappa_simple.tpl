@@ -36,10 +36,7 @@
       var siteAccess = "{"/"|ezurl(no)}";
       var mapId = 'map-{$block.id}';
       var markersId = 'markers-{$block.id}';
-      {*{field: 'stato_certificazione', 'limit': 100, 'sort': 'alpha', name: 'Stato certificazione'},
-      {field: 'sperimentazione', 'limit': 100, 'sort': 'alpha', name: 'Tipo di sperimentazione'}*}
       var facets = [{$block.custom_attributes.facets|trim()}];
-      var classIdentifier = '{$block.custom_attributes.class|trim()}';
       var attribute = '{$block.custom_attributes.attribute|trim()}';
 
       $.opendataTools.settings('language', 'ita-IT');
@@ -61,14 +58,13 @@
             "query": mainQuery,
             "filters": {}
           },
-          "endpoint": {/literal}'{"/openpa/data/ocreverse_map_markers"|ezurl(no)}'
+          "endpoint": {/literal}'{"/openpa/data/ocmap_markers"|ezurl(no)}'
           {literal}
         });
 
         opendataMap.mapId = mapId;
         opendataMap.markersId = markersId;
         opendataMap.parameters = [
-          {"key": "classIdentifier", "value": classIdentifier},
           {"key": "attribute", "value": attribute},
           {"key": "contentType", "value": "geojson"}
         ];

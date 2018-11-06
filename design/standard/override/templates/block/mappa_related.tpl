@@ -60,7 +60,7 @@
             "query": mainQuery,
             "filters": {}
           },
-          "endpoint": {/literal}'{"/openpa/data/tn_fam_map_markers"|ezurl(no)}'
+          "endpoint": {/literal}'{"/openpa/data/ocrelated_map_markers"|ezurl(no)}'
           {literal}
         });
 

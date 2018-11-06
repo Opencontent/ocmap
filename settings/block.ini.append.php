@@ -1,11 +1,32 @@
 <?php /*
 
 [General]
+AllowedTypes[]=MappaSimple
 AllowedTypes[]=MappaRelated
 AllowedTypes[]=MappaReverse
 
-[Mappa]
-Name=Mappa (related object)
+[MappaSimple]
+Name=Mappa ( la localizzazione è presente nell'oggetto )
+ManualAddingOfItems=disabled
+CustomAttributes[]
+CustomAttributes[]=query
+CustomAttributes[]=facets
+CustomAttributes[]=attribute
+CustomAttributeNames[]
+CustomAttributeNames[query]=Query
+CustomAttributeNames[facets]=Facets
+CustomAttributeNames[attribute]=Indenficatore attributo mappa
+CustomAttributeTypes[]
+CustomAttributeTypes[query]=text
+CustomAttributeTypes[facets]=text
+ViewList[]
+ViewList[]=default
+ViewName[]
+ViewName[default]=Default
+ItemsPerRow[]
+
+[MappaRelated]
+Name=Mappa ( la localizzazione è presente nell'oggetto relazionato )
 ManualAddingOfItems=disabled
 CustomAttributes[]
 CustomAttributes[]=query
@@ -25,7 +46,7 @@ ViewName[default]=Default
 ItemsPerRow[]
 
 [MappaReverse]
-Name=Mappa (reverse related object)
+Name=Mappa ( la localizzazione è presente nell'oggetto relazionato inverso)
 ManualAddingOfItems=disabled
 CustomAttributes[]
 CustomAttributes[]=query

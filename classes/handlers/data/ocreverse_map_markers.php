@@ -27,16 +27,20 @@ class DataHandlerOCReverseMapMarkers implements OpenPADataHandlerInterface
     $classIdentifier = $this->classIdentifier;
     $args = compact(array("hashIdentifier", "query", "attribute", "classIdentifier"));
 
-    if (!isset($this->maps[$hashIdentifier])) {
-      $this->maps[$hashIdentifier] = MapsCacheManager::getCacheManager($hashIdentifier)->processCache(
-        array('MapsCacheManager', 'retrieveCache'),
-        array(__CLASS__, 'generateCache'),
-        null,
-        null,
-        $args
-      );
+    if ( eZINI::instance()->variable('DebugSettings', 'DebugOutput') == 'enabled' ) {
+      return self::find( $query, $attribute, $classIdentifier );
+    } else {
+      if (!isset($this->maps[$hashIdentifier])) {
+        $this->maps[$hashIdentifier] = MapsCacheManager::getCacheManager($hashIdentifier)->processCache(
+          array('MapsCacheManager', 'retrieveCache'),
+          array(__CLASS__, 'generateCache'),
+          null,
+          null,
+          $args
+        );
+      }
+      return $this->maps[$hashIdentifier];
     }
-    return $this->maps[$hashIdentifier];
   }
 
   public static function generateCache( $file, $args )
