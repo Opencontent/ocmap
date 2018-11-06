@@ -1,4 +1,14 @@
-<?php /* #?ini charset="iso-8859-1"?
+<?php /*
 
+[Cache]
+CacheItems[]=ocmaps
+
+[Cache_ocmaps]
+name=Mappe
+id=ocmaps
+tags[]=ocmaps
+path=maps/data
+isClustered=true
+class=OCMapsRepositoryCache
 
 */ ?>
