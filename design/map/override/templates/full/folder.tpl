@@ -46,7 +46,6 @@
 
             <div class="content-view-children">
                 {if $children_count}
-                	{ezscript_require( array( 'http://maps.google.com/maps/api/js?sensor=true', 'ezjsc::jquery', 'jqueryui.js', 'jquery.ui.map.min.js', 'ocmap.js'))}
                 	<script type="text/javascript">
                 	{literal}
                 	$(document).ready( function(){
