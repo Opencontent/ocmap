@@ -40,13 +40,14 @@ class OCDrawMapType extends eZDataType
     function objectAttributeContent($contentObjectAttribute)
     {
         $content = array(
-            'geo_json_string' => '',
+            'type' => '',
+            'color' => '',
+            'source' => '',
             'geo_json' => json_encode(new \Opencontent\Opendata\GeoJson\FeatureCollection()),
         );
         $data = $contentObjectAttribute->attribute('data_text');
         if ($data != ''){
-            $content['geo_json_string'] = $data;
-            $content['geo_json'] = json_encode($data);
+            $content = json_decode($data, 1);
         }
 
         return $content;
@@ -70,8 +71,20 @@ class OCDrawMapType extends eZDataType
     function fetchObjectAttributeHTTPInput($http, $base, $contentObjectAttribute)
     {
         if ($http->hasPostVariable($base . '_ocdrawmap_data_text_' . $contentObjectAttribute->attribute('id'))) {
-            $data = $http->postVariable($base . '_ocdrawmap_data_text_' . $contentObjectAttribute->attribute('id'));
-            $contentObjectAttribute->setAttribute('data_text', $data);
+            $geoJSON = $http->postVariable($base . '_ocdrawmap_data_text_' . $contentObjectAttribute->attribute('id'));
+            $content = array(
+                'geo_json' => $geoJSON
+            );
+            if ($http->hasPostVariable($base . '_ocdrawmap_osm_url_' . $contentObjectAttribute->attribute('id'))) {
+                $content['source'] = $http->postVariable($base . '_ocdrawmap_osm_url_' . $contentObjectAttribute->attribute('id'));
+            }
+            if ($http->hasPostVariable($base . '_ocdrawmap_osm_type_' . $contentObjectAttribute->attribute('id'))) {
+                $content['type'] = $http->postVariable($base . '_ocdrawmap_osm_type_' . $contentObjectAttribute->attribute('id'));
+            }
+            if ($http->hasPostVariable($base . '_ocdrawmap_osm_color_' . $contentObjectAttribute->attribute('id'))) {
+                $content['color'] = $http->postVariable($base . '_ocdrawmap_osm_color_' . $contentObjectAttribute->attribute('id'));
+            }
+            $contentObjectAttribute->setAttribute('data_text', json_encode($content));
             return true;
         }
         return false;
