@@ -42,9 +42,9 @@
         }
     });
 
-    var addGeoJSONLayer = function (json, map, featureGroup, type, color) {
+    $.addGeoJSONLayer = function (json, map, featureGroup, type, options, pointToLayer, onEachFeature) {
         var geoJSONLayer = L.geoJson(json, {
-            pointToLayer: function(feature, latlng) {
+            pointToLayer: $.isFunction(pointToLayer) ? function(feature, latlng){return pointToLayer(feature, latlng)} : function(feature, latlng) {
                 var geometry = feature.type === 'Feature' ? feature.geometry : feature;
                 if (geometry.type === 'Point') {
                     if (feature.properties.radius) {
@@ -58,16 +58,30 @@
                     }
                 }
             },
-            onEachFeature: function(feature, layer) {
+            onEachFeature: $.isFunction(onEachFeature) ? function(feature, layer){return onEachFeature(feature, layer)} :  function(feature, layer) {
                 if (feature.properties.name){
                     layer.bindPopup(feature.properties.name);
                 }
             }
         });
-        geoJSONLayer.eachLayer(function(l){            
-            l.options.color = color;
+        geoJSONLayer.eachLayer(function(l){                        
+            if (l.options){ 
+                l.options = $.extend({}, l.options, options);
+            }else if(typeof l.getLayers === 'function') {
+                $.each(l.getLayers(), function(){
+                    this.options = $.extend({}, this.options, options); 
+                    if ($.isFunction(onEachFeature)){
+                        this.options.onEachFeature = function(feature, layer){return onEachFeature(feature, layer)};
+                    } 
+                });
+            }
             featureGroup.addLayer(l);
         });
+        return geoJSONLayer;
+    };
+
+    addGeoJSONLayer = function (json, map, featureGroup, type, options) {
+        $.addGeoJSONLayer(json, map, featureGroup, type, options);
         if (featureGroup.getLayers().length > 0) {
             map.fitBounds(featureGroup.getBounds());
         }
@@ -117,6 +131,11 @@
         return map;
     };
  
+    $.ocviewmapLoadMap = function(element) {
+        var $element = $(element); 
+        return loadMap($element);  
+    };
+
     $.fn.ocviewmap = function() {
         var $element = $(this);    
         var geoJSON = $element.data('geojson');
@@ -124,7 +143,7 @@
         var color = $element.data('color');
         var map = loadMap($element); 
         var drawnItems = L.featureGroup().addTo(map);
-        addGeoJSONLayer(geoJSON, map, drawnItems, type, color);        
+        addGeoJSONLayer(geoJSON, map, drawnItems, type, {color: color});
     };
 
     $.fn.oceditmap = function() {
@@ -181,7 +200,7 @@
         mapUrlSubmit.on('click', function (e) {            
             var type = mapType.val();  
             loadSource(mapUrlInput.val(), mapType.val(), function(geoJSON){
-                addGeoJSONLayer(geoJSON, map, drawnItems, mapType.val(), mapColor.val());
+                addGeoJSONLayer(geoJSON, map, drawnItems, mapType.val(), {color: mapColor.val()});
                 storeData();
                 mapUrlSubmit.hide();
             });            
@@ -196,7 +215,7 @@
         var data = mapDataContainer.val();
         if (data.length > 0){
             var json = JSON.parse(data);
-            addGeoJSONLayer(json, map, drawnItems, mapType.val(), mapColor.val());
+            addGeoJSONLayer(json, map, drawnItems, mapType.val(), {color: mapColor.val()});
         }
         
         mapColor.spectrum({

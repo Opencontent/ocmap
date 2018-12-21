@@ -4,6 +4,10 @@ class OCDrawMapType extends eZDataType
 {
     const DATA_TYPE_STRING = 'ocdrawmap';
 
+    const DEFAULT_SUBATTRIBUTE_TYPE = 'location_rpt';
+    
+    const FIELD_TYPE_MAP = 'rpt';
+
     function __construct()
     {
         $this->eZDataType(self::DATA_TYPE_STRING, ezpI18n::tr('kernel/classes/datatypes', 'Draw Map', 'Datatype name'),
@@ -38,7 +42,7 @@ class OCDrawMapType extends eZDataType
      * @return string
      */
     function objectAttributeContent($contentObjectAttribute)
-    {
+    {        
         $content = array(
             'type' => '',
             'color' => '',
@@ -95,8 +99,68 @@ class OCDrawMapType extends eZDataType
         return true;
     }
 
+    public static function getWKTList($contentObjectAttribute)
+    {
+        $content = $contentObjectAttribute->content();
+        $json = json_decode($content['geo_json'], 1);
+        foreach ($json['features'] as $feature) {
+            $geometry = $feature['geometry'];
+            switch ($geometry['type']) {
+                case 'MultiPolygon':                    
+                    foreach ($geometry['coordinates'] as $polygonWrapper) {
+                        foreach ($polygonWrapper as $polygon) {                            
+                            $polygonCoordinates = array();
+                            foreach ($polygon as $coordinates) {
+                                $polygonCoordinates[] = $coordinates[1] . ' ' . $coordinates[0];
+                            }                        
+                            $data[] = "POLYGON((" . implode(', ', $polygonCoordinates) . "))";
+                        }
+                    }
+                    break;
+
+                case 'Polygon':
+                    foreach ($geometry['coordinates'] as $polygon) {
+                        $polygonCoordinates = array();
+                        foreach ($polygon as $coordinates) {
+                            $polygonCoordinates[] = $coordinates[1] . ' ' . $coordinates[0];
+                        }                        
+                        $data[] = "POLYGON((" . implode(', ', $polygonCoordinates) . "))";
+                    }
+                    break;
+
+                case 'LineString':
+                    foreach ($geometry['coordinates'] as $point) {
+                        if (isset($point[1]) && count($point) == 2 && is_numeric($point[1])){
+                            $data[] = $point[1] . ' ' . $point[0];              
+                        }else{
+                            foreach ($point as $coordinates) {                                
+                                $data[] = $coordinates[1] . ' ' . $coordinates[0];              
+                            }
+                        }
+                    }
+                    break;
+
+                case 'Point':
+                    if (isset($geometry['properties']['radius'])){
+                        $data[] = "Circle(" . $geometry['coordinates'][1] . ' ' . $geometry['coordinates'][0] . " d=" . $geometry['properties']['radius'] . ")";   
+                    }else{
+                        $data[] = $geometry['coordinates'][1] . ' ' . $geometry['coordinates'][0];   
+                    }
+                    break;
+                
+                default:
+                    
+                    break;
+            }
+        }
+
+        return $data;
+    }
+
     function metaData($contentObjectAttribute)
     {
+        self::addSolrFieldTypeMap();
+
         return '';
     }
 
@@ -116,6 +180,14 @@ class OCDrawMapType extends eZDataType
     function fromString($contentObjectAttribute, $string)
     {
         $contentObjectAttribute->setAttribute( 'data_text', $string );
+        $contentObjectAttribute->store();
+    }
+
+    public static function addSolrFieldTypeMap()
+    {
+        if (!isset(ezfSolrDocumentFieldName::$FieldTypeMap[self::DEFAULT_SUBATTRIBUTE_TYPE])) {
+            ezfSolrDocumentFieldName::$FieldTypeMap[self::DEFAULT_SUBATTRIBUTE_TYPE] = self::FIELD_TYPE_MAP;
+        }
     }
 
 }
