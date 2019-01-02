@@ -53,7 +53,11 @@
                         if (feature.properties.type === 'Circle')
                             return new L.Circle(latlng, feature.properties.radius);
                     } else {
-                        var customIcon = L.MakiMarkers.icon({icon: "circle", color: color});
+                        var customIconProperties = {icon: "circle"};
+                        if (options.color){
+                            customIconProperties.color = options.color;
+                        }
+                        var customIcon = L.MakiMarkers.icon(customIconProperties);
                         return new L.Marker(latlng,  {icon: customIcon});
                     }
                 }
