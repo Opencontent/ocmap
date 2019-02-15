@@ -23,6 +23,7 @@ class ocSolrDocumentFieldOCDrawMap extends ezfSolrDocumentFieldBase
     public function getData()
     {		
 		$data = array();
+        
 		$contentClassAttribute = $this->ContentObjectAttribute->attribute('contentclass_attribute');
 		$fieldName = self::getFieldName($contentClassAttribute);
 		$WKTList = OCDrawMapType::getWKTList($this->ContentObjectAttribute);

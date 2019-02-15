@@ -78,7 +78,7 @@ class ocSolrDocumentFieldGmapLocation extends ezfSolrDocumentFieldGmapLocation
     	$contentClassAttribute = $this->ContentObjectAttribute->attribute( 'contentclass_attribute' );
     	if (isset($data[self::getFieldName( $contentClassAttribute, 'coordinates' )])){
     		$coords = explode(',', $data[self::getFieldName( $contentClassAttribute, 'coordinates' )]);
-            $data[self::getFieldName( $contentClassAttribute, 'wkt' )] = $coords[1] . ' ' . $coords[0];
+            //$data[self::getFieldName( $contentClassAttribute, 'wkt' )] = $coords[1] . ' ' . $coords[0];
     	}
 
     	return $data;

@@ -186,7 +186,7 @@ class OCDrawMapType extends eZDataType
     public static function addSolrFieldTypeMap()
     {
         if (!isset(ezfSolrDocumentFieldName::$FieldTypeMap[self::DEFAULT_SUBATTRIBUTE_TYPE])) {
-            ezfSolrDocumentFieldName::$FieldTypeMap[self::DEFAULT_SUBATTRIBUTE_TYPE] = self::FIELD_TYPE_MAP;
+            //ezfSolrDocumentFieldName::$FieldTypeMap[self::DEFAULT_SUBATTRIBUTE_TYPE] = self::FIELD_TYPE_MAP;
         }
     }
 
