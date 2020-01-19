@@ -19,13 +19,13 @@
     'spectrum.css'
 ))}
 {ezscript_require(array(
-    'leaflet.0.7.2.js',
+    'leaflet/leaflet.0.7.2.js',
     'ezjsc::jquery',
     'leaflet/Control.Loading.js',
     'leaflet/geocoder/Control.Geocoder.js',
     'leaflet.draw.js',
     'leaflet-osm-data.js',
-    'Leaflet.MakiMarkers.js',
+    'leaflet/Leaflet.MakiMarkers.js',
     'spectrum.js',
     'jquery.ocdrawmap.js'
 ))}
@@ -59,7 +59,7 @@
                             name="{$attribute_base}_ocdrawmap_osm_type_{$attribute.id}">
                         <option></option>
                         <option value="osm" {if $attribute.content.type|eq('osm')}selected="selected"{/if}>Openstreet map full xml</option>
-                        <option value="ocql_geo" {if $attribute.content.type|eq('ocql_geo')}selected="selected"{/if}>Opencontent Geo API</option>
+                        <option value="geojson" {if $attribute.content.type|eq('geojson')}selected="selected"{/if}>GeoJSON</option>
                     </select>
                 </div>
                 <div class="Grid-cell u-size8of12 u-sm-size8of12 u-md-size8of12 u-lg-size8of12">

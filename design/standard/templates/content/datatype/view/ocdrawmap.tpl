@@ -11,7 +11,7 @@
 {/run-once}
 
 <div id="map-{$attribute.id}" 
-     data-geojson='{$attribute.content.geo_json)}'
+     data-geojson='{$attribute.content.geo_json}'
      data-type="{$attribute.content.type}"
      data-color="{if $attribute.content.color}{$attribute.content.color}{else}#3388ff{/if}"
      style="width: 100%; height: 600px; margin: 10px 0"></div>

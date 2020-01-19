@@ -52,6 +52,10 @@ class OCDrawMapType extends eZDataType
         $data = $contentObjectAttribute->attribute('data_text');
         if ($data != ''){
             $content = json_decode($data, 1);
+            //bc
+            if ($content['type'] == 'ocql_geo'){
+                $content['type'] = 'geojson';
+            }
         }
 
         return $content;
@@ -63,7 +67,15 @@ class OCDrawMapType extends eZDataType
      */
     function hasObjectAttributeContent($contentObjectAttribute)
     {
-        return trim($contentObjectAttribute->attribute('data_text')) != '';
+        if( trim($contentObjectAttribute->attribute('data_text')) != ''){
+            $data = $contentObjectAttribute->attribute('data_text');
+            $content = json_decode($data, 1);
+            $geoJson = json_decode($content['geo_json'], 1);
+
+            return count($geoJson['features']) > 0;
+        }
+
+        return false;
     }
 
     /**

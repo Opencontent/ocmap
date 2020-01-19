@@ -1,11 +1,11 @@
-(function ( $ ) {
+(function ($) {
 
     L.Icon.Default.imagePath = '/extension/ocmap/design/standard/images';
 
     L.Circle.include({
         toGeoJSON: function () {
             var feature = {
-                feature:{
+                feature: {
                     type: 'Feature',
                     properties: {
                         radius: this.getRadius(),
@@ -25,7 +25,7 @@
     L.CircleMarker.include({
         toGeoJSON: function () {
             var feature = {
-                feature:{
+                feature: {
                     type: 'Feature',
                     properties: {
                         radius: this.getRadius(),
@@ -44,7 +44,9 @@
 
     $.addGeoJSONLayer = function (json, map, featureGroup, type, options, pointToLayer, onEachFeature) {
         var geoJSONLayer = L.geoJson(json, {
-            pointToLayer: $.isFunction(pointToLayer) ? function(feature, latlng){return pointToLayer(feature, latlng)} : function(feature, latlng) {
+            pointToLayer: $.isFunction(pointToLayer) ? function (feature, latlng) {
+                return pointToLayer(feature, latlng)
+            } : function (feature, latlng) {
                 var geometry = feature.type === 'Feature' ? feature.geometry : feature;
                 if (geometry.type === 'Point') {
                     if (feature.properties.radius) {
@@ -54,29 +56,33 @@
                             return new L.Circle(latlng, feature.properties.radius);
                     } else {
                         var customIconProperties = {icon: "circle"};
-                        if (options.color){
+                        if (options.color) {
                             customIconProperties.color = options.color;
                         }
                         var customIcon = L.MakiMarkers.icon(customIconProperties);
-                        return new L.Marker(latlng,  {icon: customIcon});
+                        return new L.Marker(latlng, {icon: customIcon});
                     }
                 }
             },
-            onEachFeature: $.isFunction(onEachFeature) ? function(feature, layer){return onEachFeature(feature, layer)} :  function(feature, layer) {
-                if (feature.properties.name){
+            onEachFeature: $.isFunction(onEachFeature) ? function (feature, layer) {
+                return onEachFeature(feature, layer)
+            } : function (feature, layer) {
+                if (feature.properties.name) {
                     layer.bindPopup(feature.properties.name);
                 }
             }
         });
-        geoJSONLayer.eachLayer(function(l){                        
-            if (l.options){ 
+        geoJSONLayer.eachLayer(function (l) {
+            if (l.options) {
                 l.options = $.extend({}, l.options, options);
-            }else if(typeof l.getLayers === 'function') {
-                $.each(l.getLayers(), function(){
-                    this.options = $.extend({}, this.options, options); 
-                    if ($.isFunction(onEachFeature)){
-                        this.options.onEachFeature = function(feature, layer){return onEachFeature(feature, layer)};
-                    } 
+            } else if (typeof l.getLayers === 'function') {
+                $.each(l.getLayers(), function () {
+                    this.options = $.extend({}, this.options, options);
+                    if ($.isFunction(onEachFeature)) {
+                        this.options.onEachFeature = function (feature, layer) {
+                            return onEachFeature(feature, layer)
+                        };
+                    }
                 });
             }
             featureGroup.addLayer(l);
@@ -91,8 +97,8 @@
         }
     };
 
-    var loadSource = function(url, type, cb, context){
-        switch(type) {
+    var loadSource = function (url, type, cb, context) {
+        switch (type) {
             case 'osm':
                 $.ajax({
                     url: url,
@@ -103,65 +109,66 @@
                         if ($.isFunction(cb)) {
                             cb.call(context, geoJSON);
                             return true;
-                        }                        
+                        }
                     }
                 });
-            break;
+                break;
 
-            case 'ocql_geo':
+            case 'geojson':
                 $.ajax({
                     url: url,
                     dataType: "json",
-                    success: function (geoJSON) {                            
+                    success: function (geoJSON) {
                         if ($.isFunction(cb)) {
                             cb.call(context, geoJSON);
                             return true;
-                        }                        
+                        }
                     }
                 });
-            break;
+                break;
         }
     };
 
-    var loadMap = function($container){
+    var loadMap = function ($container) {
         var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
-            
-        var map = new L.Map($container[0], { center: new L.LatLng(0, 0), zoom: 13 });
+            osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
+
+        var map = new L.Map($container[0], {center: new L.LatLng(0, 0), zoom: 13});
         map.scrollWheelZoom.disable();
         osm.addTo(map);
 
         return map;
     };
- 
-    $.ocviewmapLoadMap = function(element) {
-        var $element = $(element); 
-        return loadMap($element);  
+
+    $.ocviewmapLoadMap = function (element) {
+        var $element = $(element);
+        return loadMap($element);
     };
 
-    $.fn.ocviewmap = function() {
-        var $element = $(this);    
+    $.fn.ocviewmap = function () {
+        var $element = $(this);
         var geoJSON = $element.data('geojson');
         var type = $element.data('type');
         var color = $element.data('color');
-        var map = loadMap($element); 
+        var map = loadMap($element);
         var drawnItems = L.featureGroup().addTo(map);
         addGeoJSONLayer(geoJSON, map, drawnItems, type, {color: color});
     };
 
-    $.fn.oceditmap = function() {
-        var $element = $(this);    
+    $.fn.oceditmap = function () {
+        var $element = $(this);
 
         var mapContainer = $element.find('.map');
         var mapDataContainer = $element.find('.map-data');
         var mapType = $element.find('.map-import-type');
-        var mapColor = $element.find('.map-color');  
+        var mapColor = $element.find('.map-color');
         var mapUrlInput = $element.find('.map-import-url');
         var mapUrlSubmit = $element.find('.map-import-submit');
-    
-        var map = loadMap(mapContainer);        
-        
+        var mapReset = $element.find('.map-reset');
+
+        var map = loadMap(mapContainer);
+
         var drawnItems = L.featureGroup().addTo(map);
         map.addControl(new L.Control.Draw({
             edit: {
@@ -185,12 +192,12 @@
         });
         map.on(L.Draw.Event.DELETED, function (event) {
             var data = drawnItems.toGeoJSON();
-            if (drawnItems.getLayers().length == 0){
+            if (drawnItems.getLayers().length === 0) {
                 mapUrlSubmit.show();
             }
             storeData();
         });
-        
+
         L.Control.geocoder({
             collapsed: false,
             placeholder: 'Cerca...',
@@ -201,34 +208,40 @@
             map.fitBounds(e.geocode.bbox);
         }).addTo(map);
 
-        mapUrlSubmit.on('click', function (e) {            
-            var type = mapType.val();  
-            loadSource(mapUrlInput.val(), mapType.val(), function(geoJSON){
+        mapUrlSubmit.on('click', function (e) {
+            var type = mapType.val();
+            loadSource(mapUrlInput.val(), mapType.val(), function (geoJSON) {
+                drawnItems.clearLayers();
                 addGeoJSONLayer(geoJSON, map, drawnItems, mapType.val(), {color: mapColor.val()});
                 storeData();
-                mapUrlSubmit.hide();
-            });            
+            });
             e.preventDefault();
         });
 
-        var storeData = function(){
+        mapReset.on('click', function (e) {
+            drawnItems.clearLayers();
+            storeData();
+            e.preventDefault();
+        });
+
+        var storeData = function () {
             var json = drawnItems.toGeoJSON();
             mapDataContainer.val(JSON.stringify(json));
-        };        
+        };
 
         var data = mapDataContainer.val();
-        if (data.length > 0){
+        if (data.length > 0) {
             var json = JSON.parse(data);
             addGeoJSONLayer(json, map, drawnItems, mapType.val(), {color: mapColor.val()});
         }
-        
+
         mapColor.spectrum({
             preferredFormat: "hex",
             showInput: true,
             showInitial: true
         });
- 
+
         return this;
     };
- 
-}( jQuery ));
+
+}(jQuery));
